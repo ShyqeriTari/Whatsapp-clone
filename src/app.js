@@ -10,7 +10,7 @@ app.use(express.json())
 
 // Routes
 
-app.use("/user", usersRouter)
+app.use("/users", usersRouter)
 
 
 // For test purposes

@@ -6,7 +6,7 @@ import { JWTAuthMiddleware } from "../../auth/JWTMiddleware.js"
 
 const usersRouter = express.Router()
 
-usersRouter.post("/register", async (req, res, next) => {
+usersRouter.post("/account", async (req, res, next) => {
     try {
       const newUser = new UsersModel(req.body)
       const { _id, name } = await newUser.save()
@@ -17,7 +17,7 @@ usersRouter.post("/register", async (req, res, next) => {
     }
   })
 
-usersRouter.post("/login", async (req, res, next) => {
+usersRouter.post("/session", async (req, res, next) => {
     try {
       const { email, password} = req.body
   

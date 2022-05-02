@@ -31,7 +31,7 @@ describe("Testing the environment", () => {
     }
 
     it("should test than when registering a new user we are receiving a 201 status, a user id and token", async () => {
-        const response = await client.post("/user/register").send(validUser)
+        const response = await client.post("/users/account").send(validUser)
 
         expect(response.status).toBe(201)
 
@@ -47,7 +47,7 @@ describe("Testing the environment", () => {
 
     it("should test that when registering a new user with invalid data we receive 400", async () => {
 
-        const response = await client.post("/user/register").send(invalidUser)
+        const response = await client.post("/users/account").send(invalidUser)
 
         expect(response.status).toBe(400)
     })
