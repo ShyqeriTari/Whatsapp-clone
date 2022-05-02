@@ -21,9 +21,15 @@ const cloudMulterAvatar = multer({ storage: cloudStorageProd, limits: { fileSize
 usersRouter.post("/account", async (req, res, next) => {
     try {
       const newUser = new UsersModel(req.body)
-      const { _id, name } = await newUser.save()
-      const accessToken = await generateAccessToken({ _id: _id, name: name })
-      res.status(201).send({ _id, accessToken })
+      const { _id, username } = await newUser.save()
+      const accessToken = await generateAccessToken({ _id: _id, username: username })
+
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        sameSite:"lax",
+        secure: false,
+      })
+      res.status(201).send({ _id })
     } catch (error) {
       next(error)
     }
@@ -37,9 +43,15 @@ usersRouter.post("/session", async (req, res, next) => {
   
       if (user) {
   
-        const accessToken = await generateAccessToken({ _id: user._id, name: user.name })
+        const accessToken = await generateAccessToken({ _id: user._id, username: user.username })
+
+        res.cookie("accessToken", accessToken, {
+          httpOnly: true,
+          sameSite:"lax",
+          secure: false,
+        })
   
-        res.send({ accessToken })
+        res.send()
       } else {
         next(createError(401, `Credentials are not ok!`))
       }
@@ -98,5 +110,18 @@ usersRouter.post("/session", async (req, res, next) => {
       next(error);
     }
   });
+
+  usersRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
+    try {
+      const updatedUser = await UsersModel.findByIdAndUpdate(req.user._id, req.body, { new: true })
+      if (updatedUser) {
+        res.send(updatedUser)
+      } else {
+        next(404, `User with id ${req.user._id} not found!`)
+      }
+    } catch (error) {
+      next(error)
+    }
+  })
 
 export default usersRouter
