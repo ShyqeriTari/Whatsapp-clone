@@ -4,8 +4,19 @@ import UsersModel from "./model.js"
 import { generateAccessToken } from "../../auth/tools.js"
 import { JWTAuthMiddleware } from "../../auth/JWTMiddleware.js"
 import q2m from "query-to-mongo"
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import { v2 as cloudinary } from "cloudinary";
+import multer from "multer";
 
 const usersRouter = express.Router()
+
+const cloudStorageProd = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "Whatsapp-clone-avatar",
+  },
+})
+const cloudMulterAvatar = multer({ storage: cloudStorageProd, limits: { fileSize: 3145728 } })
 
 usersRouter.post("/account", async (req, res, next) => {
     try {
@@ -77,5 +88,15 @@ usersRouter.post("/session", async (req, res, next) => {
     }
   })
 
+  usersRouter.post("/me/avatar", JWTAuthMiddleware, cloudMulterAvatar.single("avatar"), async (req, res, next) => {
+    try {
+      const user = await UsersModel.findByIdAndUpdate(req.user._id, { avatar: req.file.path }, { new: true });
+  
+      res.send(user);
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  });
 
 export default usersRouter
