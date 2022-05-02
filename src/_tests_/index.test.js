@@ -2,7 +2,6 @@ import app from '../app.js'
 import supertest from "supertest"
 import mongoose from 'mongoose'
 import dotenv from "dotenv"
-import jest from "jest"
 
 dotenv.config()
 
