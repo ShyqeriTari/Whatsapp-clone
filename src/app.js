@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import { badRequestHandler, unauthorizedHandler, forbiddenHandler, notFoundHandler, genericErrorHandler } from "./errorHandlers.js"
+import usersRouter from "./services/users/index.js"
 
 const app = express()
 
@@ -8,6 +9,8 @@ app.use(cors())
 app.use(express.json())
 
 // Routes
+
+app.use("/user", usersRouter)
 
 
 // For test purposes
