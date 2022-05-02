@@ -3,6 +3,7 @@ import createError from "http-errors"
 import UsersModel from "./model.js"
 import { generateAccessToken } from "../../auth/tools.js"
 import { JWTAuthMiddleware } from "../../auth/JWTMiddleware.js"
+import q2m from "query-to-mongo"
 
 const usersRouter = express.Router()
 
@@ -36,6 +37,21 @@ usersRouter.post("/session", async (req, res, next) => {
     }
   })
 
+  usersRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
+    try {
+      const mongoQuery = q2m(req.query)
+      console.log(mongoQuery)
+      const user = await UsersModel.find({username: {$regex : mongoQuery.criteria.q, $options : "i"}})
+      if (user) {
+        res.send(user)
+      } else {
+        next(401, `User with id ${req.user._id} not found!`)
+      }
+    } catch (error) {
+      next(error)
+    }
+  })
+
   usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
     try {
       const user = await UsersModel.findById(req.user._id)
@@ -48,5 +64,6 @@ usersRouter.post("/session", async (req, res, next) => {
       next(error)
     }
   })
+
 
 export default usersRouter
