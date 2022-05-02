@@ -40,7 +40,7 @@ chatRouter.post("/", async (req, res, next) => {
 });
 
 // TESTING ENDPOINT for creating chats
-
+// --> My ID I retrieve from JWT Token
 chatRouter.post("/create-chat", async (req, res, next) => {
   try {
     const newChat = new ChatModel(req.body);
