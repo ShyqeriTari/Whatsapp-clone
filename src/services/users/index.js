@@ -124,4 +124,14 @@ usersRouter.post("/session", async (req, res, next) => {
     }
   })
 
+  usersRouter.delete("/session", JWTAuthMiddleware, async (req, res, next) => {
+    try {
+
+      res.clearCookie("accessToken").send()
+        
+    } catch (error) {
+        res.status(400).send()
+    }
+})
+
 export default usersRouter
