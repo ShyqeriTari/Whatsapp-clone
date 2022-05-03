@@ -15,7 +15,7 @@ chatRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const user = await UserModel.findById(req.user._id);
 
-    console.log(user);
+    console.log(req.user._id);
 
     const chats = await ChatModel.find({ members: { $all: [req.user._id] } });
 
@@ -36,14 +36,35 @@ chatRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
 //(otherwise none of them would be listening to incoming messages to this room).
 //RESPONSES: 200 Returning a previously existing chat  ;  201 Created a new chat
 
-chatRouter.post("/", async (req, res, next) => {
+chatRouter.post("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
     // 1 check if the request sender already has a chat with the recipient
 
-    if (chatExists) {
-      // 2 - Return messages in the chat
+    console.log("SENDER: ", req.user._id);
+    console.log("RECIPIENT: ", req.body.recipient);
+    const commonChats = await ChatModel.find({
+      members: { $all: [req.user._id, req.body.recipient] },
+    });
+
+    console.log("These are common chats: ", commonChats);
+
+    if (commonChats.length > 0) {
+      // 2 - If common chat(s) exist - return messages from the first chat in the arr.
+      res.status(200).send(commonChats);
+    } else {
+      // 3 - if chat doesn't exist, create a new chat
+      const newChat = new ChatModel(req.body);
+      const { _id } = await newChat.save();
+
+      const recipient = mongoose.Types.ObjectId(req.body.recipient);
+      const chat = await ChatModel.findByIdAndUpdate(
+        { _id: mongoose.Types.ObjectId(_id) },
+        { $addToSet: { members: { $each: [recipient, req.user._id] } } },
+        { new: true }
+      );
+      console.log(chat);
+      res.status(201).send(chat);
     }
-    // 3 - if chat doesn't exist, create a new chat
   } catch (error) {
     next(error);
   }
