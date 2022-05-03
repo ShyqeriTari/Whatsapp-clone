@@ -26,8 +26,8 @@ usersRouter.post("/account", async (req, res, next) => {
 
       res.cookie("accessToken", accessToken, {
         httpOnly: true,
-        sameSite:"strict",
-        secure: true,
+        sameSite:"lax",
+        secure: false,
       })
       res.status(201).send({ _id })
     } catch (error) {
@@ -47,8 +47,8 @@ usersRouter.post("/session", async (req, res, next) => {
 
         res.cookie("accessToken", accessToken, {
           httpOnly: true,
-          sameSite:"strict",
-          secure: true,
+          sameSite:"lax",
+          secure: false,
         })
   
         res.status(200).send()
