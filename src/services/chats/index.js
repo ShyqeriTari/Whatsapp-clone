@@ -4,14 +4,24 @@ import ChatModel from "./chat-model.js";
 import MessageModel from "./message-model.js";
 import UserModel from "../users/model.js";
 import mongoose from "mongoose";
+import { JWTAuthMiddleware } from "../../auth/JWTMiddleware.js";
 
 const chatRouter = express.Router();
 
 // ACTIVE ENDPOINT - 1 -  Returns all chats in which you are a member.
 // Chat history doesn't get provided with this endpoint or the body payload would quickly become excessive.
 //RESPONSES: 404 -Chat Not Found, 200 - Success, 401 - Unauthorized
-chatRouter.get("/", async (req, res, next) => {
+chatRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
+    const user = await UserModel.findById(req.user._id);
+
+    console.log(user);
+
+    const chats = await ChatModel.find({ members: { $all: [req.user._id] } });
+
+    console.log(chats);
+
+    res.status(200).send(chats);
   } catch (error) {
     next(error);
   }
@@ -76,6 +86,15 @@ chatRouter.get("/get-chats", async (req, res, next) => {
 
 chatRouter.get("/:id", async (req, res, next) => {
   try {
+    const chat = await ChatModel.findById(req.params.id)
+      .populate({ path: "members" })
+      .populate({ path: "messages" });
+
+    if (chat) {
+      res.status(200).send(chat);
+    } else {
+      next(createError(404, `Chat with id: ${req.params.id} not found`));
+    }
   } catch (error) {
     next(error);
   }
