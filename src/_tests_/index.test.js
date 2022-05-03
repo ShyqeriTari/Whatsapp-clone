@@ -29,7 +29,7 @@ describe("Testing the environment", () => {
         "password": "test."
     }
 
-    it("should test than when registering a new user we are receiving a 201 status, a user id", async () => {
+    it("should test than when registering a new user we are receiving a 201 status and a user id", async () => {
         const response = await client.post("/users/account").send(validUser)
 
         expect(response.status).toBe(201)
