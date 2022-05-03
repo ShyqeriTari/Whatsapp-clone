@@ -74,6 +74,30 @@ describe("Testing the environment", () => {
         expect(response.status).toBe(401)
     })
 
+    it("should test that when searching user by query without accessToken we are not retrieving the data and getting a 401 status", async () => {
+
+        const response = await client.get("/users?q=m")
+
+        expect(response.status).toBe(401)
+    })
+
+    it("should test that when accessing our personal data without accessToken we are not retrieving the data and getting a 401 status", async () => {
+
+        const response = await client.get("/users/me")
+
+        expect(response.status).toBe(401)
+    })
+
+    const existingId = "626fa972987d20be71eed34e"
+
+    it("should test than when accessing single user data with id  without accessToken we are not retrieving the data and getting a 401 status", async () => {
+        const response = await client.get(`/users/${existingId}`)
+
+        expect(response.status).toBe(401)
+
+    })
+
+
     afterAll(async () => {
         console.log("afterAll")
         // await mongoose.connection.dropDatabase()

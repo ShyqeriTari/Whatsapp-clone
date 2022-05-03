@@ -91,7 +91,7 @@ usersRouter.post("/session", async (req, res, next) => {
     try {
       const user = await UsersModel.findById(req.params.id)
       if (user) {
-        res.send(user)
+        res.status(200).send(user)
       } else {
         next(404, `User with id ${req.params.id} not found!`)
       }
