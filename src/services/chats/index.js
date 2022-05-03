@@ -17,7 +17,7 @@ chatRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
 
     console.log(req.user._id);
 
-    const chats = await ChatModel.find({ members: { $all: [req.user._id] } });
+    const chats = await ChatModel.find({ members: { $all: [req.user._id] } }).populate({path: "members"});
 
     console.log(chats);
 
