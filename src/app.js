@@ -1,3 +1,4 @@
+
 import express from "express";
 import cors from "cors";
 import {
@@ -9,11 +10,14 @@ import {
 } from "./errorHandlers.js";
 import usersRouter from "./services/users/index.js";
 import chatRouter from "./services/chats/index.js";
+import cookieParser from "cookie-parser"
 
 const app = express();
 
 app.use(cors());
+app.use(cookieParser())
 app.use(express.json());
+
 
 // Routes
 
