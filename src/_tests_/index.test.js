@@ -29,14 +29,13 @@ describe("Testing the environment", () => {
         "password": "test."
     }
 
-    it("should test than when registering a new user we are receiving a 201 status, a user id and token", async () => {
+    it("should test than when registering a new user we are receiving a 201 status, a user id", async () => {
         const response = await client.post("/users/account").send(validUser)
 
         expect(response.status).toBe(201)
 
         console.table(response.body)
         expect(response.body._id).toBeDefined()
-        expect(response.body.accessToken).toBeDefined()
 
     })
 
