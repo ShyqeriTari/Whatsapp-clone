@@ -2,10 +2,12 @@ import express from "express"
 import cors from "cors"
 import { badRequestHandler, unauthorizedHandler, forbiddenHandler, notFoundHandler, genericErrorHandler } from "./errorHandlers.js"
 import usersRouter from "./services/users/index.js"
+import cookieParser from "cookie-parser"
 
 const app = express()
 
 app.use(cors())
+app.use(cookieParser())
 app.use(express.json())
 
 // Routes
