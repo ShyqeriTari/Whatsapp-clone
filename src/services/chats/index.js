@@ -81,4 +81,36 @@ chatRouter.get("/:id", async (req, res, next) => {
   }
 });
 
+//TESTING ENDPOINT for sending messages
+
+chatRouter.post("/:id/message", async (req, res, next) => {
+  try {
+    //1 - find chat with ID
+    console.log(req.params.id);
+    let chatToUpdate = await ChatModel.findById(req.params.id);
+
+    //2 - if chat exists - push a message to the messages
+
+    if (chatToUpdate) {
+      console.log("This is chat to update from params:  ", chatToUpdate);
+      console.log("This is request body: ", req.body);
+
+      const newMessage = new MessageModel(req.body);
+      const { _id } = await newMessage.save();
+
+      chatToUpdate = await ChatModel.findByIdAndUpdate(
+        { _id: mongoose.Types.ObjectId(req.params.id) },
+        { $push: { messages: _id } },
+        { new: true }
+      );
+
+      res.status(201).send(chatToUpdate);
+    } else {
+      res.status(404);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default chatRouter;
