@@ -51,7 +51,7 @@ usersRouter.post("/session", async (req, res, next) => {
           secure: false,
         })
   
-        res.send()
+        res.status(200).send()
       } else {
         next(createError(401, `Credentials are not ok!`))
       }

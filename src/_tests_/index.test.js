@@ -50,6 +50,30 @@ describe("Testing the environment", () => {
         expect(response.status).toBe(400)
     })
 
+    const validAccess = {
+        "email": "guest@gmail.com",
+        "password": "test."
+    }
+
+    it("should test than when login we are receiving a 200 status", async () => {
+        const response = await client.post("/users/session").send(validAccess)
+
+        expect(response.status).toBe(200)
+
+    })
+
+    const invalidAccess = {
+        "email": "gues",
+        "password": "te."
+    }
+
+    it("should test that when login with invalid data we receive 400", async () => {
+
+        const response = await client.post("/users/session").send(invalidAccess)
+
+        expect(response.status).toBe(401)
+    })
+
     afterAll(async () => {
         console.log("afterAll")
         // await mongoose.connection.dropDatabase()
