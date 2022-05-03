@@ -24,7 +24,7 @@ describe("Testing the environment", () => {
 
 
     const validUser = {
-        "name": "Test 1",
+        "username": "Test",
         "email": "guest@gmail.com",
         "password": "test."
     }
