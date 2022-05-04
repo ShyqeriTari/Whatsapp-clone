@@ -4,35 +4,52 @@ import app from "./app.js";
 import { Server } from "socket.io";
 import { createServer } from "http";
 import Chat from "./services/chats/chat-model.js";
+import { verifyAccessToken } from "./auth/tools.js";
 
 let onlineUsers = [];
 // Server connection
 
 const port = process.env.PORT;
 const httpServer = createServer(app);
-const io = new Server(httpServer, {});
+const io = new Server(httpServer, {
+  origin: "https://localhost:3000",
+  methods: ["GET", "POST"],
+  credentials: true,
+});
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   console.log("🔛 SOCKET ID: ", socket.id);
-  //console.log("🤝 HANDSHAKE: ", socket.handshake);
-
+  console.log("🤝 HANDSHAKE: ", socket.handshake.headers.cookie.split("=")[1]);
+  const token = socket.handshake.headers.cookie.split("=")[1];
+  const payload = await verifyAccessToken(token);
+  console.log(payload);
   socket.emit("welcome");
 
-  socket.on("setUser", ({ user, chat }) => {
-    console.log(user);
-    console.log(chat);
+  // now you have user id....
+  // grabbing chats for this user....
 
-    socket.join(chat);
-    onlineUsers.push({ user, socketId: socket.id, chat });
-
-    // How to emit an event to every other client socket
-    socket.broadcast.emit("userJoined");
-
-    // socket.emit("didLogin")
-  });
+  // the chats to join are chatDocs.map(c => c._id.toString())
+  const chats = [];
+  socket.join(chats);
 
   socket.on("outgoingMessage", async ({ message, chatId }) => {
+    /**
+     * message: {
+     * sender: "userid"
+     * content: {
+     * text: string
+     * media?: string
+     * }
+     * timestamp: number
+     * }
+     */
+
+    /*   const message = {
+      ...message,
+      sender: payload._id,
+    }; */
     console.log(message, chatId);
+    console.log(payload._id);
 
     // here we will save the message to our database...
     await Chat.findOneAndUpdate(
@@ -41,6 +58,10 @@ io.on("connection", (socket) => {
     );
 
     socket.to(chatId).emit("incomingMessage", { message });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("❌ user disconnected");
   });
 });
 

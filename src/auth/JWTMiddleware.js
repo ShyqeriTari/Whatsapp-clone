@@ -1,5 +1,5 @@
-import createError from "http-errors"
-import { verifyAccessToken } from "./tools.js"
+import createError from "http-errors";
+import { verifyAccessToken } from "./tools.js";
 
 // export const JWTAuthMiddleware = async (req, res, next) => {
 //   if (!req.headers.authorization) {
@@ -22,22 +22,21 @@ import { verifyAccessToken } from "./tools.js"
 // }
 
 export const JWTAuthMiddleware = async (req, res, next) => {
-
   if (!req.cookies.accessToken) {
-    next(createError(401, "Please send access token in cookies"))
+    next(createError(401, "Please send access token in cookies"));
   } else {
     try {
-      const token = req.cookies.accessToken
+      const token = req.cookies.accessToken;
 
-      const payload = await verifyAccessToken(token)
+      const payload = await verifyAccessToken(token);
 
       req.user = {
         _id: payload._id,
         username: payload.username,
-      }
-      next()
+      };
+      next();
     } catch (error) {
-      next(createError(401, "Token is not valid!"))
+      next(createError(401, "Token is not valid!"));
     }
   }
-}
+};
