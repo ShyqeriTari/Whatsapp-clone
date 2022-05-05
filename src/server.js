@@ -6,6 +6,7 @@ import { createServer } from "http";
 import Chat from "./services/chats/chat-model.js";
 import { verifyAccessToken } from "./auth/tools.js";
 import chatModel from "./services/chats/chat-model.js";
+import messageModel from "./services/chats/message-model.js";
 
 let onlineUsers = [];
 // Server connection
@@ -37,16 +38,16 @@ io.on("connection", async (socket) => {
   const userChats = await chatModel.find({
     members: { $all: [payload._id] },
   });
-  // console.log(
-  //   ` 👩‍👩‍👧‍👧THESE ARE CHATS THIS USER ${payload.username} IS MEMBER OF: `,
-  //   userChats
-  // );
+  console.log(
+    ` 👩‍👩‍👧‍👧THESE ARE CHATS THIS USER ${payload.username} IS MEMBER OF: `,
+    userChats
+  );
   // the chats to join are chatDocs.map(c => c._id.toString())
   const chats = userChats.map((chat) => chat._id.toString());
   //console.log("THIS IS ARRAY WITH CHAT IDs TO JOIN: ", chats);
   socket.join(chats);
 
-  socket.on("outgoingMessage", async ({ message, chatId }) => {
+  socket.on("outgoingMessage", async ({ data, chat }) => {
     /**
      * message: {
      * sender: "userid"
@@ -62,16 +63,26 @@ io.on("connection", async (socket) => {
       ...message,
       sender: payload._id,
     }; */
-    console.log(message, chatId);
-    console.log(payload._id);
+    console.log("MESSAGE FROM FE: ", data);
+    console.log("CHAT ID: ", chat);
+    console.log("payload._id: ", payload._id);
 
+    const message = {
+      sender: mongoose.Types.ObjectId(payload._id),
+      ...data,
+    };
+
+    const newMessage = new messageModel(message);
+    const { _id } = await newMessage.save();
+
+    console.log("MESSAGE IM TRYING TO PUSH TO DB: ", message);
     // here we will save the message to our database...
     await Chat.findOneAndUpdate(
-      { _id: chatId },
-      { $push: { messages: message } }
+      { _id: mongoose.Types.ObjectId(chat) },
+      { $push: { messages: _id } }
     );
 
-    socket.to(chatId).emit("incomingMessage", { message });
+    socket.to(chat).emit("incomingMessage", { newMessage });
   });
 
   socket.on("disconnect", () => {
