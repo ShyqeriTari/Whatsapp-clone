@@ -20,26 +20,27 @@ const io = new Server(httpServer, {
 
 io.on("connection", async (socket) => {
   console.log("🔛 SOCKET ID: ", socket.id);
-  console.log(
-    "🤝 HANDSHAKE TOKEN: ",
-    socket.handshake.headers.cookie.split("=")[1]
-  );
+  // console.log(
+  //   "🤝 HANDSHAKE TOKEN: ",
+  //   socket.handshake.headers.cookie.split("=")[1]
+  // );
   const token = socket.handshake.headers.cookie.split("=")[1];
   const payload = await verifyAccessToken(token);
-  console.log("TOKEN PAYLOAD: ", payload);
+  // console.log("TOKEN PAYLOAD: ", payload);
   socket.emit("welcome");
 
   // now you have user id....
+  console.log(`🟢 ${payload.username} IS ONLINE`);
   onlineUsers.push(payload._id);
   console.log(" 📻 ONLINE USERS: ", onlineUsers);
   // grabbing chats for this user....
   const userChats = await chatModel.find({
     members: { $all: [payload._id] },
   });
-  console.log(
-    ` 👩‍👩‍👧‍👧THESE ARE CHATS THIS USER ${payload.username} IS MEMBER OF: `,
-    userChats
-  );
+  // console.log(
+  //   ` 👩‍👩‍👧‍👧THESE ARE CHATS THIS USER ${payload.username} IS MEMBER OF: `,
+  //   userChats
+  // );
   // the chats to join are chatDocs.map(c => c._id.toString())
   const chats = userChats.map((chat) => chat._id.toString());
   //console.log("THIS IS ARRAY WITH CHAT IDs TO JOIN: ", chats);
@@ -74,9 +75,7 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log(
-      `❌ user NAME: ${payload.username}, _ID: ${payload._id} disconnected`
-    );
+    console.log(`❌ ${payload.username}, _ID: ${payload._id} disconnected`);
     onlineUsers = onlineUsers.filter((user) => user !== payload._id);
     console.log(" 📻 ONLINE USERS: ", onlineUsers);
   });
