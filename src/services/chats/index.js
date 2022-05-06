@@ -128,8 +128,10 @@ chatRouter.post(
   (req, res, next) => {
     try {
       console.log(req.file.path);
-      res.send(req.file.path);
-    } catch (error) {}
+      res.status(201).send({ url: req.file.path });
+    } catch (error) {
+      next(error);
+    }
   }
 );
 
