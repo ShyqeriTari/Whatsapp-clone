@@ -5,6 +5,20 @@ import MessageModel from "./message-model.js";
 import UserModel from "../users/model.js";
 import mongoose from "mongoose";
 import { JWTAuthMiddleware } from "../../auth/JWTMiddleware.js";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import { v2 as cloudinary } from "cloudinary";
+import multer from "multer";
+
+const cloudStorageProd = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "Whatsapp-clone-chat-media",
+  },
+});
+const cloudMulterAvatar = multer({
+  storage: cloudStorageProd,
+  limits: { fileSize: 3145728 },
+});
 
 const chatRouter = express.Router();
 
@@ -74,38 +88,54 @@ chatRouter.post("/", JWTAuthMiddleware, async (req, res, next) => {
 
 // TESTING ENDPOINT for creating chats
 // --> My ID I retrieve from JWT Token
-chatRouter.post("/create-chat", async (req, res, next) => {
-  try {
-    const newChat = new ChatModel(req.body);
-    const { _id } = await newChat.save();
-    console.log(req.body);
-    const recipient = mongoose.Types.ObjectId(req.body.recipient);
-    const chat = await ChatModel.findByIdAndUpdate(
-      { _id: mongoose.Types.ObjectId(_id) },
-      { $addToSet: { members: recipient } },
-      { new: true }
-    );
-    console.log(chat);
-    res.status(201).send(chat);
-  } catch (error) {
-    next(error);
-  }
-});
+// chatRouter.post("/create-chat", async (req, res, next) => {
+//   try {
+//     const newChat = new ChatModel(req.body);
+//     const { _id } = await newChat.save();
+//     console.log(req.body);
+//     const recipient = mongoose.Types.ObjectId(req.body.recipient);
+//     const chat = await ChatModel.findByIdAndUpdate(
+//       { _id: mongoose.Types.ObjectId(_id) },
+//       { $addToSet: { members: recipient } },
+//       { new: true }
+//     );
+//     console.log(chat);
+//     res.status(201).send(chat);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 //TESTING ENDPOINT for getting all chats
-chatRouter.get("/get-chats", async (req, res, next) => {
-  try {
-    const chats = await ChatModel.find({})
-      .populate({ path: "members" })
-      .populate({ path: "messages" });
+// chatRouter.get("/get-chats", async (req, res, next) => {
+//   try {
+//     const chats = await ChatModel.find({})
+//       .populate({ path: "members" })
+//       .populate({ path: "messages" });
 
-    res.send(chats);
-  } catch (error) {
-    next(error);
+//     res.send(chats);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
+
+//ACTIVE ENDPOINT - 3 - Receives form-data, uploads file to cloudinary,
+//sends back to FE URL of the media.
+
+chatRouter.post(
+  "/media",
+  cloudMulterAvatar.single("media"),
+  (req, res, next) => {
+    try {
+      console.log(req.file.path);
+      res.status(201).send({ url: req.file.path });
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
-// ACTIVE ENDPOINT - 3 - Returns full message history for a specific chat
+// ACTIVE ENDPOINT - 4 - Returns full message history for a specific chat
 
 chatRouter.get("/:id", async (req, res, next) => {
   try {

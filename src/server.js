@@ -38,34 +38,19 @@ io.on("connection", async (socket) => {
   const userChats = await chatModel.find({
     members: { $all: [payload._id] },
   });
-  console.log(
-    ` 👩‍👩‍👧‍👧THESE ARE CHATS THIS USER ${payload.username} IS MEMBER OF: `,
-    userChats
-  );
+  // console.log(
+  //   ` 👩‍👩‍👧‍👧THESE ARE CHATS THIS USER ${payload.username} IS MEMBER OF: `,
+  //   userChats
+  // );
   // the chats to join are chatDocs.map(c => c._id.toString())
   const chats = userChats.map((chat) => chat._id.toString());
   //console.log("THIS IS ARRAY WITH CHAT IDs TO JOIN: ", chats);
   socket.join(chats);
 
   socket.on("outgoingMessage", async ({ data, chat }) => {
-    /**
-     * message: {
-     * sender: "userid"
-     * content: {
-     * text: string
-     * media?: string
-     * }
-     * timestamp: number
-     * }
-     */
-
-    /*   const message = {
-      ...message,
-      sender: payload._id,
-    }; */
     console.log("MESSAGE FROM FE: ", data);
     console.log("CHAT ID: ", chat);
-    console.log("payload._id: ", payload._id);
+    console.log("payload._id (= user id): ", payload._id);
 
     const message = {
       sender: mongoose.Types.ObjectId(payload._id),
@@ -75,7 +60,7 @@ io.on("connection", async (socket) => {
     const newMessage = new messageModel(message);
     const { _id } = await newMessage.save();
 
-    console.log("MESSAGE IM TRYING TO PUSH TO DB: ", message);
+    //console.log("MESSAGE IM TRYING TO PUSH TO DB: ", message);
     // here we will save the message to our database...
     await Chat.findOneAndUpdate(
       { _id: mongoose.Types.ObjectId(chat) },
