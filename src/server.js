@@ -25,6 +25,9 @@ io.on("connection", async (socket) => {
   //   "🤝 HANDSHAKE TOKEN: ",
   //   socket.handshake.headers.cookie.split("=")[1]
   // );
+
+  if (!socket.handshake.headers.cookie) throw new Error("COOKIE ERROR!");
+
   const token = socket.handshake.headers.cookie.split("=")[1];
   const payload = await verifyAccessToken(token);
   // console.log("TOKEN PAYLOAD: ", payload);
